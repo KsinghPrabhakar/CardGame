@@ -1,23 +1,15 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useEffect } from "react";
 import Card from "./component/Card";
+import Table from "./component/Table";
 const App = () => {
-  const [allCards, setAllCards] = useState([]);
+  const [allCards, setAllCards] = useState([]); // [{cardName: 'A', cardColor: 'spades}, ... {}]
+  const [playerCards, setPlayerCards] = useState([]);
+  const [totalPlayers, setTotalPlayers] = useState(2);
+  const [reStartGame, setReStartGame] = useState(false)
   const colors = ["spades", "heart", "diamond", "club"];
   const card = [
-    "A",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "J",
-    "Q",
-    "K",
+    2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
   ];
 
   const getRandomValue = (multiplyBy) => {
@@ -38,6 +30,25 @@ const App = () => {
     setAllCards(shuffledCard);
   };
 
+  const distributeCards = () => {
+    let ditributedCards = [] //[[{}, {}, {}], [{}, {}, {}]]
+    let startingIndex = 0;
+    let endingIndex = 3;
+    for(let i=0; i<totalPlayers; i++){
+      const singlePlayerCards = allCards.slice(startingIndex, endingIndex);
+      ditributedCards.push(singlePlayerCards);
+      startingIndex += 3;
+      endingIndex += 3
+    }
+    setPlayerCards(ditributedCards)
+  }
+
+  useEffect(() => {
+    if(allCards && allCards.length){
+      distributeCards();
+    }
+  },[allCards])
+
   const generateAllCards = () => {
     let card52 = [];
     for (let i = 0; i < 4; i++) {
@@ -54,13 +65,14 @@ const App = () => {
 
   useEffect(() => {
     generateAllCards();
-  }, []);
+  }, [reStartGame]);
 
-  console.log("myCards", allCards);
+  const restartGameHandler = useCallback((start) => {
+    setReStartGame(start)
+  },[])
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
-      {allCards.map((item, index) => {
-        console.log("iteme is", item?.cardName, item?.cardColor);
+      {/* {allCards.map((item, index) => {
         return (
           <Card
             cardName={item?.cardName}
@@ -68,7 +80,8 @@ const App = () => {
             key={index}
           />
         );
-      })}
+      })} */}
+      <Table totalPlayers={totalPlayers} playerCards={playerCards} reStartGame={reStartGame} restartGameHandler={restartGameHandler} />
     </div>
   );
 };
